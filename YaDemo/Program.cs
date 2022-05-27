@@ -1,12 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using YaEcs;
-using YaEcs.MicrosoftDependencyInjectionExtensions;
 using YaDemo;
+using YaEcs.MicrosoftDependencyInjectionExtensions;
 using YaEngine.Bootstrap;
-using YaEngine.ImGui;
-using YaEngine.Physics;
 
 var configurationBuilder = new ConfigurationBuilder();
 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
@@ -24,20 +23,21 @@ services
     .AddDefaultSystems()
     .AddOpenGl()
     .AddOpenAl()
-    .AddBulletPhysics()
-    // .AddScoped<IInitializeSystem, BuildSceneSystem>()
-    //.AddScoped<IPhysicsSystem, DebugDrawSystem>()
-    .AddScoped<IInitializeSystem, BuildPhysicsSceneSystem>()
-    .AddScoped<IPhysicsSystem, RestartPhysicsSystem>()
-    .AddScoped<IPhysicsSystem, ThrowCubeSystem>()
-    .AddScoped<IUpdateSystem, EnableEffectsSystem>()
-    .AddScoped<IUpdateSystem, EnableMusicSystem>()
-    .AddScoped<IUpdateSystem, SwitchAnimationsSystem>()
-    .AddScoped<IUpdateSystem, MoveCameraSystem>()
-    .AddScoped<IUpdateSystem, QuitSystem>()
-    .AddScoped<IImGuiSystem, ShowTransformsGuiSystem>()
-    .AddScoped<IUpdateSystem, MoveLightSystem>();
+    .AddBulletPhysics();
+switch (args.FirstOrDefault())
+{
+    case "animations":
+        services.AddAnimationsScene(configuration);
+        break;
+    case "physics":
+        services.AddPhysicsScene(configuration);
+        break;
+    default:
+        Console.WriteLine("Hello World");
+        return 0;
+}
     
 var serviceProvider = services.BuildServiceProvider();
 var bootstrapper = serviceProvider.GetService<SilkBootstrapper>();
 bootstrapper.Run();
+return 0;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using YaEcs;
 using YaEcs.Bootstrap;
 using YaEngine.Core;
@@ -11,6 +12,25 @@ namespace YaDemo
         public UpdateStep UpdateStep => UpdateSteps.Update;
         
         public void Execute(IWorld world)
+        {
+            //MoveToCamera(world);
+            MoveInCylinder(world);
+        }
+
+        private static void MoveToCamera(IWorld world)
+        {
+            if (!world.TryGetSingleton(out CameraRegistry cameraRegistry)) return;
+
+            var camera = cameraRegistry.Cameras.FirstOrDefault();
+            if (!world.TryGetComponent(camera, out Transform cameraTransform)) return;
+
+            world.ForEach((Entity _, AmbientLight _, Transform transform) =>
+            {
+                transform.Parent.Position = cameraTransform.Position;
+            });
+        }
+
+        private static void MoveInCylinder(IWorld world)
         {
             if (!world.TryGetSingleton(out Time time)) return;
 

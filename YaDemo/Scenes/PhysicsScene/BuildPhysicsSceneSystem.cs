@@ -122,18 +122,18 @@ namespace YaDemo
                 new DebugDraw { RenderEntity = debugEntity });
         }
 
-        private static void CreateLight(IWorld world, Vector3 spotlightColor)
+        private static void CreateLight(IWorld world, Vector3 color)
         {
             var lightParentTransform = new Transform
             {
-                Position = new Vector3(0f, 5f, 5f),
+                Position = new Vector3(-4, 11, 15),
             };
             world.Create(
                 new Transform
                 {
                     Parent = lightParentTransform
                 },
-                new AmbientLight { Color = spotlightColor },
+                new AmbientLight { Color = color },
                 new RendererInitializer
                 {
                     Material = new MaterialInitializer
@@ -141,7 +141,7 @@ namespace YaDemo
                         ShaderInitializer = ColorShader.Value,
                         Vector4Uniforms = new Dictionary<string, Vector4>
                         {
-                            ["uColor"] = new(spotlightColor, 1f)
+                            ["uColor"] = new(color, 1f)
                         }
                     },
                     Mesh = Quad.Mesh,
