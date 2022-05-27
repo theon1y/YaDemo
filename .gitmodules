@@ -1,0 +1,3 @@
+[submodule "YaEngine"]
+	path = YaEngine
+	url = https://github.com/theon1y/YaEngine.git
