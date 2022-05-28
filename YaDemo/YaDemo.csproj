@@ -11,4 +11,11 @@
     <ItemGroup>
       <ProjectReference Include="..\YaEngine\YaEngine\YaEngine.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+    <None Include="$(SolutionDir)YaDemo\Assets\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Assets\" />
+    <None Update="Assets\Models\Skeleton\Animations\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    </ItemGroup>
 </Project>

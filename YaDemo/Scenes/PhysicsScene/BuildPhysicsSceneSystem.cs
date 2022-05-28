@@ -54,15 +54,6 @@ namespace YaDemo
 
         private void CreateGround(IWorld world)
         {
-            var debugEntity = world.Create(new Transform(),
-                new RendererInitializer
-                {
-                    Material = new MaterialInitializer
-                    {
-                        ShaderInitializer = NoShader.Value
-                    },
-                    Mesh = Cube.Mesh,
-                });
             world.Create(new Transform
                 {
                     Position = new Vector3(0, 0, 0),
@@ -72,27 +63,21 @@ namespace YaDemo
                 {
                     Material = new MaterialInitializer
                     {
-                        ShaderInitializer = DiffuseShader.Value
+                        ShaderInitializer = DiffuseShader.Value,
+                        Vector4Uniforms = new Dictionary<string, Vector4>
+                        {
+                            ["uTexture0Uv"] = new(8, 8, 0, 0)
+                        }
                     },
                     Mesh = Cube.Mesh,
                 },
                 new ColliderInitializer
                 {
-                },
-                new DebugDraw { RenderEntity = debugEntity });
+                });
         }
 
         private static void CreateCube(IWorld world, Vector3 position, Color color, float mass)
         {
-            var debugEntity = world.Create(new Transform(),
-                new RendererInitializer
-                {
-                    Material = new MaterialInitializer
-                    {
-                        ShaderInitializer = NoShader.Value
-                    },
-                    Mesh = Cube.Mesh,
-                });
             var lightParentTransform = new Transform
             {
                 Position = position,
@@ -118,8 +103,7 @@ namespace YaDemo
                 new ColliderInitializer
                 {
                     Mass = mass
-                },
-                new DebugDraw { RenderEntity = debugEntity });
+                });
         }
 
         private static void CreateLight(IWorld world, Vector3 color)

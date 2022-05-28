@@ -1,0 +1,237 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
+using YaEcs;
+using YaEngine.Animation;
+using YaEngine.Audio;
+using YaEngine.Bootstrap;
+using YaEngine.Core;
+using YaEngine.Import;
+using YaEngine.Render;
+using YaEngine.VFX.ParticleSystem;
+using YaEngine.VFX.ParticleSystem.Modules;
+using YaEngine.VFX.ParticleSystem.Modules.Shapes;
+using YaEngine.VFX.ParticleSystem.Modules.Value;
+using YaEngine.VFX.ParticleSystem.Shaders;
+
+namespace YaDemo
+{
+    public class BuildAnimationsSceneSystem : IInitializeSystem
+    {
+        public int Priority => InitializePriorities.Third;
+        
+        private readonly ModelImporter modelImporter;
+        private readonly AnimationImporter animationImporter;
+
+        public BuildAnimationsSceneSystem(ModelImporter modelImporter, AnimationImporter animationImporter)
+        {
+            this.modelImporter = modelImporter;
+            this.animationImporter = animationImporter;
+        }
+        
+        public async Task ExecuteAsync(IWorld world)
+        {
+            CreateCamera(world);
+            CreateLight(world, Color.White.ToVector3());
+            
+            await CreateCharacter(world);
+            
+            CreateMusic(world);
+            CreateParticleSystem(world);
+        }
+
+        private static void CreateParticleSystem(IWorld world)
+        {
+            var particleTexturePath = "Assets/Textures/particle.png";
+            var particleTexture = GetTexture(particleTexturePath);
+            world.Create(new Transform { Position = new Vector3(-1f, 1f, 6f) }, 
+                new ParticleEffect
+            {
+                Material = new MaterialInitializer
+                {
+                    ShaderInitializer = BillboardParticleShader.Value,
+                    TextureInitializer = particleTexture,
+                    Blending = Blending.Additive
+                },
+                Mesh = Quad.Mesh,
+                MaxParticles = 20,
+                Modules = new List<IModule>
+                {
+                    new EmissionModule
+                    {
+                        Rate = 10f,
+                        Duration = 5,
+                        IsLooping = true,
+                        ParticleLifetime = new Vector2(1, 2),
+                        ParticleSpeed = new Vector2(1, 3)
+                    },
+                    new ShapeModule { Shape = new ConeShape(45) },
+                    new LifetimeModule(),
+                    new ColorModule { Provider = new InterpolateVector4(Color.Red.ToVector4(), Color.Transparent.ToVector4()) },
+                    new ScaleModule { Provider = new InterpolateVector3(Vector3.One, Vector3.One * 0.5f)  },
+                    new RotateModule { Provider = new Constant<Quaternion>(Quaternion.Identity) },
+                    new MoveModule(),
+                }
+            });
+        }
+
+        private static TextureInitializer GetTexture(string texturePath)
+        {
+            var textureName = Path.GetFileNameWithoutExtension(texturePath);
+            var charTexture = new TextureInitializer(textureName, new FileTextureProvider(texturePath));
+            return charTexture;
+        }
+
+        private static void CreateMusic(IWorld world)
+        {
+            world.Create(new Music(),
+                new AudioInitializer
+                {
+                    AudioProvider =
+                        new Mp3AudioProvider("Assets/Audio/price-of-freedom-33106.mp3")
+                });
+        }
+
+        private async Task CreateCharacter(IWorld world)
+        {
+            var options = new ImportOptions(Scale: 0.1f);
+            
+            var modelPath = "Assets/Models/BH-2 Free.fbx";
+            var modelImport = modelImporter.Import(modelPath, options);
+            var meshes = modelImport.Meshes;
+            var avatar = modelImport.Avatar;
+            Console.WriteLine($"Imported meshes: {string.Join(", ", meshes.Select(x => x.Name))}");
+            
+            var animationsPath = "Assets/Animations";
+            var animationImports = await ImportAnimations(animationsPath, options,
+                (filePath, _) => Path.GetFileNameWithoutExtension(filePath));
+            var animations = animationImports
+                .SelectMany(x => x.Animations)
+                .Concat(modelImport.Animations)
+                .ToList();
+            Console.WriteLine($"Imported animations: {string.Join(", ", animations.Select(x => x.Name))}");
+            
+            var albedoPath = "Assets/Textures/BH-2_AlbedoTransparency.png";
+            var albedoTexture = GetTexture(albedoPath);
+            var specularPath = "Assets/Textures/BH-2_SpecularSmoothness.png";
+            var specularTexture = GetTexture(specularPath);
+            var normalPath = "Assets/Textures/BH-2_Normal.png";
+            var normalTexture = GetTexture(normalPath);
+            var material = new MaterialInitializer
+            {
+                ShaderInitializer = DiffuseAnimationShader.Value,
+                TextureInitializer = albedoTexture,
+                TextureUniforms =
+                {
+                    ["uSpecularTexture0"] = specularTexture,
+                    ["uNormalTexture0"] = normalTexture
+                },
+                FloatUniforms =
+                {
+                    ["uAmbientStrength"] = 1f,
+                    ["uDiffuseStrength"] = 1f,
+                    ["uSpecularStrength"] = 1f,
+                    ["uShiness"] = 64
+                }
+            };
+
+            var animator = new Animator(animations, avatar);
+            var characterTransform = new Transform
+            {
+                Position = new Vector3(0f, 0f, 5f),
+                // Rotation = MathUtils.FromEulerDegrees(270, 0, 0),
+                Scale = Vector3.One * 0.5f,
+            };
+            var character = world.Create(characterTransform);
+            var transforms = new Transform[avatar.Hierarchy.Length - 1];
+            world.AddComponent(character, animator);
+            for (var i = 0; i < transforms.Length; ++i)
+            {
+                var avatarNode = avatar.Hierarchy[i];
+                var parentTransform = avatarNode.ParentIndex < 0 ? characterTransform : transforms[avatarNode.ParentIndex];
+                var transform = new Transform { Parent = parentTransform };
+                transform.SetLocalTransform(avatarNode.LocalTransform);
+                transforms[i] = transform;
+                
+                foreach (var meshIndex in avatarNode.MeshIndexes)
+                {
+                    var mesh = modelImport.Meshes[meshIndex];
+                    var renderer = world.Create(transform,
+                        new RendererInitializer
+                        {
+                            Material = material,
+                            Mesh = mesh,
+                            BoneMatrices = animator.BoneMatrices
+                        });
+                }
+            }
+        }
+
+        private static void CreateLight(IWorld world, Vector3 color)
+        {
+            var lightParentTransform = new Transform
+            {
+                Position = new Vector3(0f, 5f, 5f),
+            };
+            world.Create(
+                new Transform
+                {
+                    Parent = lightParentTransform
+                },
+                new AmbientLight { Color = color },
+                new RendererInitializer
+                {
+                    Material = new MaterialInitializer
+                    {
+                        ShaderInitializer = ColorShader.Value,
+                        Vector4Uniforms = new Dictionary<string, Vector4>
+                        {
+                            ["uColor"] = new(color, 1f)
+                        }
+                    },
+                    Mesh = Quad.Mesh,
+                    CullFace = false
+                });
+        }
+
+        private static void CreateCamera(IWorld world)
+        {
+             world.Create(
+                new Camera { Fov = 45 },
+                new Transform
+                {
+                    Position = new Vector3(-4, 11, 15),
+                    Rotation = MathUtils.FromEulerDegrees(34, 160, 0)
+                });
+        }
+
+        private async Task<ModelImporterResult[]> ImportAnimations(string path, ImportOptions options,
+            Func<string, string, string> nameGenerator)
+        {
+            if (string.IsNullOrEmpty(path)) return Array.Empty<ModelImporterResult>();
+            
+            var animationPaths = new DirectoryInfo(path)
+                .GetFiles()
+                .Select(x => x.FullName);
+            var tasks = animationPaths
+                .Select(async path =>
+                {
+                    var import = await Task.Run(() => modelImporter.Import(path, options));
+                    foreach (var animation in import.Animations)
+                    {
+                        animation.Name = nameGenerator(path, animation.Name);
+                    }
+                    return import;
+                })
+                .ToArray();
+            await Task.WhenAll(tasks);
+            return tasks
+                .Select(x => x.Result)
+                .ToArray();
+        }
+    }
+}

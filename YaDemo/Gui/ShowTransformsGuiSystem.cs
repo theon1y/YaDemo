@@ -27,7 +27,9 @@ namespace YaDemo
                     ShowAnimator(animator);
                 }
             });
-            
+
+            var pos = GetWindowPos() + new Vector2(0, GetWindowSize().Y + 10);
+            SetNextWindowPos(pos);
             End();
         }
 

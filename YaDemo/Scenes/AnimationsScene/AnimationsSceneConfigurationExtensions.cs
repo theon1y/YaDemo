@@ -11,13 +11,14 @@ namespace YaDemo
             IConfiguration configuration)
         {
             return serviceCollection
-                .AddScoped<IInitializeSystem, BuildSceneSystem>()
+                .AddScoped<IInitializeSystem, BuildAnimationsSceneSystem>()
                 .AddScoped<IUpdateSystem, EnableEffectsSystem>()
                 .AddScoped<IUpdateSystem, EnableMusicSystem>()
                 .AddScoped<IUpdateSystem, SwitchAnimationsSystem>()
                 .AddScoped<IUpdateSystem, MoveCameraSystem>()
                 .AddScoped<IUpdateSystem, QuitSystem>()
                 .AddScoped<IImGuiSystem, ShowTransformsGuiSystem>()
+                .AddScoped<IImGuiSystem, AnimationControlsGuiSystem>()
                 .AddScoped<IUpdateSystem, MoveLightSystem>();
         }
     }

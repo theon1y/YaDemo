@@ -24,16 +24,28 @@ services
     .AddOpenGl()
     .AddOpenAl()
     .AddBulletPhysics();
-switch (args.FirstOrDefault())
+
+int scene;
+if (args.Length <= 0)
 {
-    case "animations":
+    Console.WriteLine("Select demo scene:\n\t1. Animations\n\t2. Physics\nOr press anything else to quit");
+    scene = Console.Read() - 48;
+}
+else
+{
+    scene = int.Parse(args.FirstOrDefault());
+}
+
+switch (scene)
+{
+    case 1:
         services.AddAnimationsScene(configuration);
         break;
-    case "physics":
+    case 2:
         services.AddPhysicsScene(configuration);
         break;
     default:
-        Console.WriteLine("Hello World");
+        Console.WriteLine("davai, udachi");
         return 0;
 }
     
