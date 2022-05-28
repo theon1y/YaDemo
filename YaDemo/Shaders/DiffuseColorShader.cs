@@ -17,35 +17,44 @@ uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
-uniform vec3 lightColor;
-uniform vec3 lightDirection;
-
-out vec4 fDiffuse;
+out vec3 fPos;
+out vec3 fNormal;
 
 void main()
 {
-    gl_Position = uProjection * uView * uModel * vec4(vPos,1.0f);
-    vec3 normal = normalize(mat3(transpose(inverse(uModel))) * vNormal);
-    float diff = max(dot(normal, normalize(lightDirection)), 0.0);
-    fDiffuse = vec4(diff * lightColor, 1.0);
+    gl_Position = uProjection * uView * uModel * vec4(vPos, 1);
+    fPos = vec3(uModel * vec4(vPos, 1));
+    fNormal = normalize(mat3(transpose(inverse(uModel))) * vNormal);
 }
 ";
 
         private const string Fragment = @"
 #version 330 core
 
-in vec4 fDiffuse;
+in vec3 fPos;
+in vec3 fNormal;
 
 uniform vec4 uColor;
+
+uniform vec3 uLightColor;
+uniform vec3 uLightPosition;
+uniform vec3 uViewPosition;
 
 out vec4 FragColor;
 
 void main()
 {
-      vec4 objectColor = uColor;
-      vec4 result = fDiffuse * objectColor;
+    vec3 lightDirection = normalize(uLightPosition - fPos);
+    float diff = max(dot(fNormal, lightDirection), 0);
 
-      FragColor = result;
+    vec3 viewDirection = normalize(uViewPosition - fPos);
+    vec3 reflectionDirection = reflect(-lightDirection, fNormal);
+    float specularStrength = dot(reflectionDirection, viewDirection);
+    float specular = pow(max(0.0, specularStrength), 64);
+
+    vec4 lightingColor = (0.33f + 0.5f * diff + specular) * vec4(uLightColor, 1);
+
+    FragColor = lightingColor * uColor;
 }
 ";
     }

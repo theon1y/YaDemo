@@ -18,23 +18,16 @@ uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
-uniform vec3 lightColor;
-uniform vec3 lightDirection;
-
 out vec3 fPos;
 out vec2 fUv;
-out vec4 fDiffuse;
+out vec3 fNormal;
 
 void main()
 {
-    gl_Position = uProjection * uView * uModel * vec4(vPos,1.0f);
-
-    vec3 normal = normalize(mat3(transpose(inverse(uModel))) * vNormal);
-    float diff = max(dot(normal, normalize(lightDirection)), 0.0);
-    fDiffuse = vec4(diff * lightColor, 1.0);
-
-    fPos = vec3(uModel * vec4(vPos,1.0f));
+    gl_Position = uProjection * uView * uModel * vec4(vPos, 1);
+    fPos = vec3(uModel * vec4(vPos, 1));
     fUv = vUv;
+    fNormal = normalize(mat3(transpose(inverse(uModel))) * vNormal);
 }
 ";
 
@@ -42,20 +35,33 @@ void main()
 #version 330 core
 
 in vec2 fUv;
-in vec3 fNormal;
 in vec3 fPos;
-in vec4 fDiffuse;
+in vec3 fNormal;
 
 uniform sampler2D uTexture0;
+uniform vec4 uTexture0Uv;
+
+uniform vec3 uLightColor;
+uniform vec3 uLightPosition;
+uniform vec3 uViewPosition;
 
 out vec4 FragColor;
 
 void main()
 {
-      vec4 objectColor = texture(uTexture0, fUv);
-      vec4 result = fDiffuse * objectColor;
+    vec3 lightDirection = normalize(uLightPosition - fPos);
+    float diff = max(dot(fNormal, lightDirection), 0);
 
-      FragColor = result;
+    vec3 viewDirection = normalize(uViewPosition - fPos);
+    vec3 reflectionDirection = reflect(-lightDirection, fNormal);
+    float specularStrength = dot(reflectionDirection, viewDirection);
+    float specular = pow(max(0.0, specularStrength), 64);
+
+    vec4 lightingColor = (0.33f + 0.5f * diff + specular) * vec4(uLightColor, 1);
+
+    vec2 albedoUv = fUv * uTexture0Uv.xy + uTexture0Uv.zw;
+    vec4 albedoColor = texture(uTexture0, albedoUv);
+    FragColor = lightingColor * albedoColor;
 }
 ";
     }
