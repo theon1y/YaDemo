@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using YaEcs;
 using YaEngine.Animation;
 using YaEngine.Audio;
@@ -25,12 +26,12 @@ namespace YaDemo
         public int Priority => InitializePriorities.Third;
         
         private readonly ModelImporter modelImporter;
-        private readonly AnimationImporter animationImporter;
+        private readonly ILogger<BuildAnimationsSceneSystem> logger;
 
-        public BuildAnimationsSceneSystem(ModelImporter modelImporter, AnimationImporter animationImporter)
+        public BuildAnimationsSceneSystem(ModelImporter modelImporter, ILogger<BuildAnimationsSceneSystem> logger)
         {
             this.modelImporter = modelImporter;
-            this.animationImporter = animationImporter;
+            this.logger = logger;
         }
         
         public async Task ExecuteAsync(IWorld world)
@@ -104,7 +105,8 @@ namespace YaDemo
             var modelImport = modelImporter.Import(modelPath, options);
             var meshes = modelImport.Meshes;
             var avatar = modelImport.Avatar;
-            Console.WriteLine($"Imported meshes: {string.Join(", ", meshes.Select(x => x.Name))}");
+            logger.LogInformation("Imported meshes: {0}",
+                string.Join(", ", meshes.Select(x => x.Name)));
             
             var animationsPath = "Assets/Animations";
             var animationImports = await ImportAnimations(animationsPath, options,
@@ -113,7 +115,8 @@ namespace YaDemo
                 .SelectMany(x => x.Animations)
                 .Concat(modelImport.Animations)
                 .ToList();
-            Console.WriteLine($"Imported animations: {string.Join(", ", animations.Select(x => x.Name))}");
+            logger.LogInformation("Imported animations: {0}",
+                string.Join(", ", animations.Select(x => x.Name)));
             
             var albedoPath = "Assets/Textures/BH-2_AlbedoTransparency.png";
             var albedoTexture = GetTexture(albedoPath);

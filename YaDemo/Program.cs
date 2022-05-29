@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,14 +6,9 @@ using YaDemo;
 using YaEcs.MicrosoftDependencyInjectionExtensions;
 using YaEngine.Bootstrap;
 
-var configurationBuilder = new ConfigurationBuilder();
-configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
-{
-    { "WindowConfig:Width", "1280" },
-    { "WindowConfig:Height", "720" },
-    { "WindowConfig:Title", "YaDemo" },
-});
-var configuration = configurationBuilder.Build();
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", false, false)
+    .Build();
 var services = new ServiceCollection();
 
 services
@@ -23,7 +17,8 @@ services
     .AddDefaultSystems()
     .AddOpenGl()
     .AddOpenAl()
-    .AddBulletPhysics();
+    .AddBulletPhysics()
+    .AddDefaultLogging(configuration);
 
 int scene;
 if (args.Length <= 0)

@@ -14,5 +14,8 @@
 
     <ItemGroup>
     <None Include="$(SolutionDir)YaDemo\Assets\**" CopyToOutputDirectory="PreserveNewest" LinkBase="Assets\" />
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     </ItemGroup>
 </Project>
