@@ -52,7 +52,7 @@ void main()
     float specularStrength = dot(reflectionDirection, viewDirection);
     float specular = pow(max(0.0, specularStrength), 64);
 
-    vec4 lightingColor = (0.33f + 0.5f * diff + specular) * vec4(uLightColor, 1);
+    vec4 lightingColor = (0.33f + 0.66f * diff + specular) * vec4(uLightColor, 1);
 
     FragColor = lightingColor * uColor;
 }
