@@ -3,12 +3,13 @@ using YaEcs;
 using YaEcs.Bootstrap;
 using YaEngine.Bootstrap;
 using YaEngine.Input;
+using YaEngine.Model;
 
 namespace YaDemo
 {
-    public class QuitSystem : IUpdateSystem
+    public class QuitSystem : IModelSystem
     {
-        public UpdateStep UpdateStep => UpdateSteps.Update;
+        public UpdateStep UpdateStep => ModelSteps.Update;
         
         public void Execute(IWorld world)
         {

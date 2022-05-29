@@ -12,6 +12,7 @@ using YaEngine.Audio;
 using YaEngine.Bootstrap;
 using YaEngine.Core;
 using YaEngine.Import;
+using YaEngine.Model;
 using YaEngine.Render;
 using YaEngine.VFX.ParticleSystem;
 using YaEngine.VFX.ParticleSystem.Modules;
@@ -21,7 +22,7 @@ using YaEngine.VFX.ParticleSystem.Shaders;
 
 namespace YaDemo
 {
-    public class BuildAnimationsSceneSystem : IInitializeSystem
+    public class BuildAnimationsSceneSystem : IInitializeModelSystem
     {
         public int Priority => InitializePriorities.Third;
         
@@ -37,7 +38,7 @@ namespace YaDemo
         public async Task ExecuteAsync(IWorld world)
         {
             CreateCamera(world);
-            CreateLight(world, Color.White.ToVector3());
+            CreateLight(world, Color.IndianRed.ToVector3());
             
             await CreateCharacter(world);
             
@@ -49,7 +50,10 @@ namespace YaDemo
         {
             var particleTexturePath = "Assets/Textures/particle.png";
             var particleTexture = GetTexture(particleTexturePath);
-            world.Create(new Transform { Position = new Vector3(-1f, 1f, 6f) }, 
+            var light = world.Entities
+                .FirstOrDefault(x => world.TryGetComponent<AmbientLight>(x, out _));
+            world.TryGetComponent(light, out Transform lightTransform);
+            world.Create(new Transform { Parent = lightTransform, Position = lightTransform.Position }, 
                 new ParticleEffect
             {
                 Material = new MaterialInitializer
@@ -146,7 +150,6 @@ namespace YaDemo
             var characterTransform = new Transform
             {
                 Position = new Vector3(0f, 0f, 5f),
-                // Rotation = MathUtils.FromEulerDegrees(270, 0, 0),
                 Scale = Vector3.One * 0.5f,
             };
             var character = world.Create(characterTransform);
@@ -185,20 +188,7 @@ namespace YaDemo
                 {
                     Parent = lightParentTransform
                 },
-                new AmbientLight { Color = color },
-                new RendererInitializer
-                {
-                    Material = new MaterialInitializer
-                    {
-                        ShaderInitializer = ColorShader.Value,
-                        Vector4Uniforms = new Dictionary<string, Vector4>
-                        {
-                            ["uColor"] = new(color, 1f)
-                        }
-                    },
-                    Mesh = Quad.Mesh,
-                    CullFace = false
-                });
+                new AmbientLight { Color = color });
         }
 
         private static void CreateCamera(IWorld world)
@@ -208,7 +198,7 @@ namespace YaDemo
                 new Transform
                 {
                     Position = new Vector3(-4, 11, 15),
-                    Rotation = MathUtils.FromEulerDegrees(34, 160, 0)
+                    Rotation = MathUtils.FromEulerDegrees(30, 165, 4)
                 });
         }
 

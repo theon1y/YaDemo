@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using YaEcs;
 using YaEngine.Bootstrap;
 using YaEngine.Core;
+using YaEngine.Model;
 using YaEngine.Physics;
 using YaEngine.Render;
 
 namespace YaDemo
 {
-    public class BuildPhysicsSceneSystem : IInitializeSystem
+    public class BuildPhysicsSceneSystem : IInitializeModelSystem
     {
         public int Priority => InitializePriorities.Third;
 

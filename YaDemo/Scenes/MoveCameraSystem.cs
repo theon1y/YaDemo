@@ -5,13 +5,14 @@ using YaEcs.Bootstrap;
 using YaEngine.Bootstrap;
 using YaEngine.Core;
 using YaEngine.Input;
+using YaEngine.Model;
 using YaEngine.Render;
 
 namespace YaDemo
 {
-    public class MoveCameraSystem : IUpdateSystem
+    public class MoveCameraSystem : IModelSystem
     {
-        public UpdateStep UpdateStep => UpdateSteps.Update;
+        public UpdateStep UpdateStep => ModelSteps.Update;
 
         private static readonly Key[] MoveBindings = { Key.D, Key.A, Key.W, Key.S };
         private static readonly Key[] LookBindings = { Key.Right, Key.Left, Key.Down, Key.Up };

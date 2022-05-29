@@ -3,13 +3,14 @@ using System.Linq;
 using YaEcs;
 using YaEcs.Bootstrap;
 using YaEngine.Core;
+using YaEngine.Model;
 using YaEngine.Render;
 
 namespace YaDemo
 {
-    public class MoveLightSystem : IUpdateSystem
+    public class MoveLightSystem : IModelSystem
     {
-        public UpdateStep UpdateStep => UpdateSteps.Update;
+        public UpdateStep UpdateStep => ModelSteps.Update;
         
         public void Execute(IWorld world)
         {

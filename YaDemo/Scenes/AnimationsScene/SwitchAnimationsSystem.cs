@@ -4,12 +4,13 @@ using YaEcs;
 using YaEcs.Bootstrap;
 using YaEngine.Animation;
 using YaEngine.Input;
+using YaEngine.Model;
 
 namespace YaDemo
 {
-    public class SwitchAnimationsSystem : IUpdateSystem
+    public class SwitchAnimationsSystem : IModelSystem
     {
-        public UpdateStep UpdateStep => UpdateSteps.Update;
+        public UpdateStep UpdateStep => ModelSteps.Update;
         
         public void Execute(IWorld world)
         {

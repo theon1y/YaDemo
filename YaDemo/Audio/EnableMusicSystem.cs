@@ -1,12 +1,13 @@
 ﻿using YaEcs;
 using YaEcs.Bootstrap;
 using YaEngine.Audio;
+using YaEngine.Model;
 
 namespace YaDemo
 {
-    public class EnableMusicSystem : IUpdateSystem
+    public class EnableMusicSystem : IModelSystem
     {
-        public UpdateStep UpdateStep => UpdateSteps.Update;
+        public UpdateStep UpdateStep => ModelSteps.Update;
         
         public void Execute(IWorld world)
         {

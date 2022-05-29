@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaEngine", "YaEngine\YaEngi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaEcs", "YaEngine\YaEcs\YaECS\YaEcs.csproj", "{D13E3502-2598-4C37-8EEE-3CBC2F246478}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftDependencyInjectionExtensions", "YaEngine\YaEcs\MicrosoftDependencyInjectionExtensions\MicrosoftDependencyInjectionExtensions.csproj", "{03780E46-8A58-4BE8-9A0B-60982543474A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{D13E3502-2598-4C37-8EEE-3CBC2F246478}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D13E3502-2598-4C37-8EEE-3CBC2F246478}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D13E3502-2598-4C37-8EEE-3CBC2F246478}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03780E46-8A58-4BE8-9A0B-60982543474A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03780E46-8A58-4BE8-9A0B-60982543474A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03780E46-8A58-4BE8-9A0B-60982543474A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03780E46-8A58-4BE8-9A0B-60982543474A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
